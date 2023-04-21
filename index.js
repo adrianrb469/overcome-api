@@ -2,11 +2,13 @@ const express = require('express')
 const app = express()
 const mongoose = require('mongoose')
 const userRoutes = require('./routes/userRoutes')
+const authRoutes = require('./routes/authRoutes')
 const jwt = require('jsonwebtoken')
 require('dotenv').config()
 
 app.use(express.json())
-app.use('/user', userRoutes)
+app.use(authRoutes)
+app.use('/users', userRoutes)
 
 mongoose
     .connect(

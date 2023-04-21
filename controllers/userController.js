@@ -46,11 +46,13 @@ const login = async (req, res) => {
 
 const createUser = async (req, res) => {
     try {
-        const { name, email, password } = req.body
+        const { username, name, lastname, email, password } = req.body
         const salt = await bcrypt.genSalt(10)
         const hashedPassword = await bcrypt.hash(password, salt)
         const newUser = new userModel({
+            username,
             name,
+            lastname,
             email,
             password: hashedPassword,
         })
@@ -76,8 +78,9 @@ const getAllUsers = async (req, res) => {
 
 const getUserById = async (req, res) => {
     console.log('Getting user by id...')
+    console.log(req.params)
     try {
-        const user = await userModel.findOne({ userId: req.params.id })
+        const user = await userModel.findOne({ _id: req.params.id })
         res.status(200).json(user)
     } catch (error) {
         console.error(error)
