@@ -7,6 +7,7 @@ router.get('/', userController.getAllUsers)
 
 router.use(authMiddleware)
 
+router.get('/me', userController.getCurrentUser)
 router.get('/:id', userController.getUserById)
 
 module.exports = router

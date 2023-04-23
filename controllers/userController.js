@@ -7,7 +7,7 @@ const generateToken = (user) => {
         _id: user._id,
         name: user.name,
     }
-    return jwt.sign(payload, process.env.JWT_SECRET, {
+    return jwt.sign(payload, process.env.ACCESS_TOKEN_SECRET, {
         expiresIn: '1h',
     })
 }
@@ -57,8 +57,8 @@ const createUser = async (req, res) => {
             password: hashedPassword,
         })
         const user = await newUser.save()
-        const token = generateToken(user)
-        res.json({ token })
+
+        res.json({ user, message: 'User created successfully' })
     } catch (error) {
         console.log(error)
         res.status(500).json({ message: 'Server error' })
@@ -77,11 +77,26 @@ const getAllUsers = async (req, res) => {
 }
 
 const getUserById = async (req, res) => {
-    console.log('Getting user by id...')
     console.log(req.params)
     try {
         const user = await userModel.findOne({ _id: req.params.id })
         res.status(200).json(user)
+    } catch (error) {
+        console.error(error)
+        res.status(500).send('Error fetching user from database')
+    }
+}
+
+const getCurrentUser = async (req, res) => {
+    console.log(req.user)
+    try {
+        const user = await userModel.findOne({ _id: req.user._id })
+        res.status(200).json({
+            _id: user._id,
+            name: user.name,
+            username: user.username,
+            email: user.email,
+        })
     } catch (error) {
         console.error(error)
         res.status(500).send('Error fetching user from database')
@@ -93,4 +108,5 @@ module.exports = {
     login,
     createUser,
     getUserById,
+    getCurrentUser,
 }

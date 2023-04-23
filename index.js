@@ -7,24 +7,26 @@ const jwt = require('jsonwebtoken')
 require('dotenv').config()
 
 app.use(express.json())
-app.use(authRoutes)
+app.use((req, res, next) => {
+    res.setHeader('Access-Control-Allow-Origin', '*')
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE')
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+    next()
+})
+
+app.use('/auth', authRoutes)
 app.use('/users', userRoutes)
 
 mongoose
-    .connect(
-        'mongodb+srv://admin:dKsotpZOHYzFLtWl@overcome.915kam0.mongodb.net/Overcome?retryWrites=true&w=majority',
-        {
-            useNewUrlParser: true,
-            useUnifiedTopology: true,
-        }
-    )
-    .then(() => console.log('Connected to MongoDB'))
+    .connect(process.env.DATABASE_URI, {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+    })
     .catch((err) => console.error(err))
 
-app.listen(3000, () => {
-    console.log('Server is running on port 3000')
-})
-
-app.get('/', (req, res) => {
-    res.send('Hello World')
+mongoose.connection.once('open', () => {
+    console.log('Connected to database')
+    const server = app.listen(process.env.PORT, () => {
+        console.log('Server is running on port', server.address().port)
+    })
 })
