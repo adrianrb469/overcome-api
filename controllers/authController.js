@@ -50,11 +50,6 @@ const handleLogin = async (req, res) => {
                 process.env.REFRESH_TOKEN_SECRET,
                 { expiresIn: '1d' }
             )
-            const test = await User.findOneAndUpdate(
-                { username: foundUser.username },
-                { refreshToken: refresh_token },
-                { new: true }
-            )
             res.cookie('jwt', refresh_token, {
                 httpOnly: true,
                 secure: true,
@@ -67,7 +62,6 @@ const handleLogin = async (req, res) => {
                 username: foundUser.username,
                 auth_token,
             })
-
             return res
         } else {
             return res.status(401).json({ message: 'Invalid credentials' })
