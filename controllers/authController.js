@@ -20,13 +20,15 @@ const handleLogin = async (req, res) => {
     try {
         const { username, password } = req.body
         if (!username || !password) {
-            res.status(400).json({ message: 'Username and password required' })
+            return res
+                .status(400)
+                .json({ message: 'Username and password required' })
         }
 
         const foundUser = await User.findOne({ username })
 
         if (!foundUser) {
-            res.status(404).json({ message: 'User not found' })
+            return res.status(404).json({ message: 'User not found' })
         }
 
         const match = await comparePassword(password, foundUser.password)
@@ -53,19 +55,20 @@ const handleLogin = async (req, res) => {
                 { refreshToken: refresh_token },
                 { new: true }
             )
-
             res.cookie('jwt', refresh_token, {
                 httpOnly: true,
-                sameSite: 'None',
-
-                maxAge: 1000 * 60 * 60 * 24,
-            }) //secure= true in production
+                secure: true,
+                sameSite: 'none',
+                maxAge: 24 * 60 * 60 * 1000,
+            })
             res.json({
+                message: `User ${foundUser.username} logged in successfully`,
                 id: foundUser._id,
                 username: foundUser.username,
                 auth_token,
             })
-            return
+
+            return res
         } else {
             return res.status(401).json({ message: 'Invalid credentials' })
         }

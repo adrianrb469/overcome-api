@@ -3,6 +3,8 @@ const User = require('../models/userModel')
 
 const handleRefreshToken = async (req, res) => {
     try {
+        console.log(req)
+        console.log(req.cookies['jwt'])
         const cookies = req.cookies
 
         if (!cookies?.jwt) {
