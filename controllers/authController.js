@@ -50,6 +50,11 @@ const handleLogin = async (req, res) => {
                 process.env.REFRESH_TOKEN_SECRET,
                 { expiresIn: '1d' }
             )
+
+            foundUser.refreshToken = refresh_token
+            const result = await foundUser.save()
+            console.log(result)
+
             res.cookie('jwt', refresh_token, {
                 httpOnly: true,
                 secure: true,
