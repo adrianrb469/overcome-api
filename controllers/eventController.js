@@ -24,6 +24,7 @@ const createEvent = async (req, res) => {
             date: req.body.date,
             duration: req.body.duration,
             chat: chat._id, // Use the chat ID as a reference
+            hour: req.body.hour,
             tags: req.body.tags,
             creator: req.body.creator,
         })
