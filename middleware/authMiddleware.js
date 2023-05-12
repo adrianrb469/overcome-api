@@ -5,6 +5,8 @@ const authMiddleware = (req, res, next) => {
     if (!authHeader) {
         return res.status(401).json({ message: 'Unauthorized' })
     }
+
+    console.log(authHeader) // yep here is the bearer token
     const token = authHeader.split(' ')[1]
     try {
         const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET)
