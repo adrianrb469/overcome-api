@@ -24,6 +24,7 @@ const eventSchema = new mongoose.Schema({
                 `${props.value} is not a valid time in the format HH:mm!`,
         },
     },
+    link: { type: String, required: false },
     chat: { type: mongoose.Schema.Types.ObjectId, ref: 'Chat' },
     tags: [{ type: String }],
 })
