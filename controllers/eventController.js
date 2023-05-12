@@ -3,7 +3,8 @@ const Chat = require('../models/chatModel')
 
 const getAllEvents = async (req, res) => {
     try {
-        const events = await Event.find({})
+        const events = await Event.find({}).populate('participants', 'username')
+
         res.status(200).json(events)
     } catch (error) {
         res.status(500).send('Error fetching events from database')
