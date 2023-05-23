@@ -6,6 +6,7 @@ const authRoutes = require('./routes/authRoutes')
 const register = require('./routes/register')
 const refresh = require('./routes/refresh')
 const eventRoutes = require('./routes/eventRoutes')
+const chatRoutes = require('./routes/chatRoutes')
 const jwt = require('jsonwebtoken')
 const cookieParser = require('cookie-parser')
 const cors = require('cors')
@@ -36,7 +37,7 @@ app.use('/users', userRoutes)
 app.use('/register', register)
 app.use('/refresh', refresh)
 app.use('/events', eventRoutes)
-
+app.use('/chats', chatRoutes)
 /*
 Checking middleware
 app.use((req, res, next) => {
