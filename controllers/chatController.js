@@ -2,7 +2,10 @@ const Chat = require('../models/chatModel')
 
 const getChatById = async (req, res) => {
     try {
-        const chat = await Chat.findById(req.params.id)
+        const chat = await Chat.findById(req.params.id).populate(
+            'messages.user',
+            'username'
+        )
         console.log('chat', chat)
         res.status(200).json(chat)
     } catch (error) {
