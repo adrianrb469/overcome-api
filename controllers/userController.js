@@ -51,9 +51,22 @@ const saveEvent = async (req, res) => {
     }
 }
 
+const addFriend = async (req, res) => {
+    try {
+        const user = await User.findOne({ _id: req.body.user_id })
+        user.friends.push(req.body.friend_id)
+        await user.save()
+        res.status(200).json(user)
+    } catch (error) {
+        console.error(error)
+        res.status(500).send('Error saving event to user')
+    }
+}
+
 module.exports = {
     getAllUsers,
     getUserById,
     getCurrentUser,
     saveEvent,
+    addFriend,
 }
