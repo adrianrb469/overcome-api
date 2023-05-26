@@ -1,77 +1,121 @@
 const User = require('../models/userModel')
-const UserRelation = require('../models/userRelationModel')
 const Chat = require('../models/chatModel')
 const mongoose = require('mongoose')
 
-const getAllUserRelations = async (req, res) => {
+const getAllRequests = async (req, res) => {
     try {
-        const userRelations = await UserRelation.find()
-        res.json(userRelations)
+        const users = await User.findById(req.body.user_id).populate(
+            'relations.user'
+        )
+        const userRelations = users.map((user) => user.relations)
+        const requests = userRelations.filter(
+            (relation) => relation.state === 'requested'
+        )
+        res.json(requests)
     } catch (err) {
         res.status(500).json({ message: err.message })
     }
 }
 
+const getAllFriends = async (req, res) => {
+    try {
+        const users = await User.findById(req.body.user_id).populate(
+            'relations.user'
+        )
+        const userRelations = users.map((user) => user.relations)
+        const requests = userRelations.filter(
+            (relation) => relation.state === 'accepted'
+        )
+        res.json(requests)
+    } catch (err) {
+        res.status(500).json({ message: err.message })
+    }
+}
+
+// ready!
 const friendRequest = async (req, res) => {
     try {
-        // Create a user relation, with the first user being the one who sent the request
-        // and the second user being the one who received the request
-        // set the first user agreement to true
-        // set the second user agreement to false
-        // create a new chat and set the newly created id to the chat_id field
-        // of the user relation
-        const userRelation = new UserRelation({
-            user1: req.body.first_user_id,
-            user2: req.body.second_user_id,
-            first_user_agreement: true,
-            second_user_agreement: false,
-        })
-        const newChat = new Chat({
-            _id: new mongoose.Types.ObjectId(),
-            messages: [],
-        })
-        userRelation.chat_id = newChat._id
-        await userRelation.save()
-        await newChat.save()
+        // envia
+        const firstUser = await User.findById(req.body.first_user_id)
+        // recibe
+        const secondUser = await User.findById(req.body.second_user_id)
 
-        res.status(201).json(userRelation)
+        // check if works, user is only and id?
+        const firstUserRelation = secondUser.relations.find(
+            (relation) => relation.user.toString() === firstUser._id.toString()
+        )
+
+        const secondUserRelation = firstUser.relations.find(
+            (relation) => relation.user.toString() === secondUser._id.toString()
+        )
+
+        if (firstUserRelation || secondUserRelation) {
+            res.status(400).json({ message: 'Users are already related' })
+        } else {
+            // Create chat
+            const chat = await Chat.create({
+                messages: [],
+            })
+
+            firstUser.relations.push({
+                user: secondUser._id,
+                state: 'pending',
+                chat_id: chat._id,
+            })
+
+            secondUser.relations.push({
+                user: firstUser._id,
+                state: 'requested',
+                chat_id: chat._id,
+            })
+
+            await firstUser.save()
+            await secondUser.save()
+            await newChat.save()
+
+            res.status(201).json({
+                message: 'Friend request sent successfully',
+            })
+        }
     } catch (err) {
         res.status(400).json({ message: err.message })
     }
 }
 
-const updateUserRelation = async (req, res) => {
-    try {
-        const userRelation = await UserRelation.findById(req.params.id)
-        if (req.body.first_user_agreement != null) {
-            userRelation.first_user_agreement = req.body.first_user_agreement
-        }
-        if (req.body.second_user_agreement != null) {
-            userRelation.second_user_agreement = req.body.second_user_agreement
-        }
-        await userRelation.save()
-        res.json(userRelation)
-    } catch (err) {}
-}
-
 // route that accepts a friend request
 const acceptFriendRequest = async (req, res) => {
     try {
-        const userRelation = await UserRelation.findOne({
-            first_user_id: req.body.requester_user_id,
-            second_user_id: req.body.accepter_user_id,
-        })
-        userRelation.second_user_agreement = true
-        await userRelation.save()
-        res.json(userRelation)
+        const accepterUser = await User.findById(req.body.accepter_user_id)
+        const requesterUser = await User.findById(req.body.requester_user_id)
+
+        const accepterRelation = accepterUser.relations.find(
+            (relation) =>
+                relation.user.toString() === req.body.requester_user_id
+        )
+
+        const requesterRelation = requesterUser.relations.find(
+            (relation) => relation.user.toString() === req.body.accepter_user_id
+        )
+
+        if (accepterRelation && requesterRelation) {
+            accepterRelation.state = 'accepted'
+            requesterRelation.state = 'accepted'
+
+            await accepterUser.save()
+            await requesterUser.save()
+
+            res.status(200).json({ message: 'Relation accepted' })
+        } else {
+            res.status(404).json({ message: 'Relation not found' })
+        }
     } catch (err) {
         res.status(400).json({ message: err.message })
     }
 }
 
 module.exports = {
-    getAllUserRelations,
+    getAllRequests,
+    getAllFriends,
     friendRequest,
-    updateUserRelation,
     acceptFriendRequest,
 }
