@@ -20,27 +20,20 @@ const friendRequest = async (req, res) => {
         // set the second user agreement to false
         // create a new chat and set the newly created id to the chat_id field
         // of the user relation
-        console.log('FRIEND REQUEST')
-        console.log(req.body.first_user_id)
-        console.log(req.body.second_user_id)
         const userRelation = new UserRelation({
             user1: req.body.first_user_id,
             user2: req.body.second_user_id,
             first_user_agreement: true,
             second_user_agreement: false,
         })
-        console.log('here1')
         const newChat = new Chat({
             _id: new mongoose.Types.ObjectId(),
             messages: [],
         })
-        console.log('here2')
         userRelation.chat_id = newChat._id
-        console.log('here3')
         await userRelation.save()
         await newChat.save()
 
-        console.log('here4')
         res.status(201).json(userRelation)
     } catch (err) {
         res.status(400).json({ message: err.message })
