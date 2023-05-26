@@ -39,7 +39,7 @@ app.use('/register', register)
 app.use('/refresh', refresh)
 app.use('/events', eventRoutes)
 app.use('/chats', chatRoutes)
-app.use('/userRelations', userRelationRoutes)
+app.use('/relations', userRelationRoutes)
 /*
 Checking middleware
 app.use((req, res, next) => {

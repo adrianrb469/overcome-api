@@ -3,27 +3,35 @@ const Chat = require('../models/chatModel')
 const mongoose = require('mongoose')
 
 const getAllRequests = async (req, res) => {
+    console.log('getAllRequests')
     try {
-        const users = await User.findById(req.body.user_id).populate(
+        console.log('getAllRequests', req.params.id)
+        const user = await User.findOne({ _id: req.params.id }).populate(
             'relations.user'
         )
-        const userRelations = users.map((user) => user.relations)
-        const requests = userRelations.filter(
+
+        console.log('getAllRequests', user.relations)
+        const requests = user?.relations.filter(
             (relation) => relation.state === 'requested'
         )
+
         res.json(requests)
     } catch (err) {
+        console.log(err)
         res.status(500).json({ message: err.message })
     }
 }
 
 const getAllFriends = async (req, res) => {
+    console.log('getAllFriends')
     try {
-        const users = await User.findById(req.body.user_id).populate(
+        console.log('getAllFriends', req.params.id)
+        const user = await User.findOne({ _id: req.params.id }).populate(
             'relations.user'
         )
-        const userRelations = users.map((user) => user.relations)
-        const requests = userRelations.filter(
+
+        console.log('getAllFriends', user.relations)
+        const requests = user?.relations.filter(
             (relation) => relation.state === 'accepted'
         )
         res.json(requests)
@@ -34,6 +42,7 @@ const getAllFriends = async (req, res) => {
 
 // ready!
 const friendRequest = async (req, res) => {
+    console.log('friendRequest 2')
     try {
         // envia
         const firstUser = await User.findById(req.body.first_user_id)
@@ -71,14 +80,15 @@ const friendRequest = async (req, res) => {
 
             await firstUser.save()
             await secondUser.save()
-            await newChat.save()
+            await chat.save()
 
             res.status(201).json({
                 message: 'Friend request sent successfully',
             })
         }
     } catch (err) {
-        res.status(400).json({ message: err.message })
+        console.log(err)
+        res.status(500).json({ message: err.message })
     }
 }
 
