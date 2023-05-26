@@ -11,9 +11,15 @@ const userSchema = new mongoose.Schema({
     },
     password: { type: String, required: true },
     refreshToken: { type: String, required: false },
-    createdEvents: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Event' }],
-    friends: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-    savedEvents: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Event' }],
+    createdEvents: [
+        { type: mongoose.Schema.Types.ObjectId, ref: 'Event', unique: true },
+    ],
+    friends: [
+        { type: mongoose.Schema.Types.ObjectId, ref: 'User', unique: true },
+    ],
+    savedEvents: [
+        { type: mongoose.Schema.Types.ObjectId, ref: 'Event', unique: true },
+    ],
 })
 
 const User = mongoose.model('User', userSchema)
