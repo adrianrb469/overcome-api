@@ -9,6 +9,7 @@ const getChatById = async (req, res) => {
         console.log('chat', chat)
         res.status(200).json(chat)
     } catch (error) {
+        console.log('chat error', error)
         res.status(500).send('Error fetching chat from database')
     }
 }
