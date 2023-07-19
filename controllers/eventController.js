@@ -56,8 +56,58 @@ const getEventById = async (req, res) => {
     }
 }
 
+const searchEvents = async (req, res) => {
+    console.log(req.body)
+    tags = req.body.tags
+    date_range = req.body.date_range
+    try {
+        // If both tag and date_range are present, filter events by both
+        if (tags && date_range) {
+            Event.find({
+                tags: { $in: tags },
+                date: {
+                    $gte: date_range[0],
+                    $lte: date_range[1],
+                },
+            })
+                .then((events) => res.json(events))
+                .catch((err) => res.status(500).json({ error: err.message }))
+        }
+
+        // If only tags are present, filter events by tag
+        else if (tags) {
+            Event.find({ tags: { $in: tags } })
+                .then((events) => res.json(events))
+                .catch((err) => res.status(500).json({ error: err.message }))
+        }
+
+        // If only date_range is present, filter events by date range
+        else if (date_range) {
+            Event.find({
+                date: {
+                    $gte: date_range[0],
+                    $lte: date_range[1],
+                },
+            })
+                .then((events) => res.json(events))
+                .catch((err) => res.status(500).json({ error: err.message }))
+        }
+
+        // If neither tag nor date_range is present, return an error
+        else {
+            res.status(400).json({
+                error: 'Please provide at least one search parameter',
+            })
+        }
+    } catch (error) {
+        console.log(error)
+        res.status(500).send('Error fetching event from database')
+    }
+}
+
 module.exports = {
     getAllEvents,
     createEvent,
     getEventById,
+    searchEvents,
 }
