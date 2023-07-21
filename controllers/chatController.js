@@ -39,6 +39,7 @@ const getLastChatsByUserId = async ( req, res ) => {
         const { userId } = req.params;
 
         const response = await Chat.find({ 'messages.user': userId })
+            .populate('messages.user', 'username')
             .sort({ 'messages.sent_at': -1 });
 
         const recentChats = response.map( chat => {
