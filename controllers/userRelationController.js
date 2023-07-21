@@ -123,9 +123,48 @@ const acceptFriendRequest = async (req, res) => {
     }
 }
 
+const friendStatus = async (req, res) => {
+    try {
+        const user = await User.findById(req.body.id)
+        const friend = await User.findById(req.body.friend_id)
+
+        const userRelation = user.relations.find(
+            (relation) => relation.user.toString() === friend._id.toString()
+        )
+
+        const friendRelation = friend.relations.find(
+            (relation) => relation.user.toString() === user._id.toString()
+        )
+
+        if (userRelation && friendRelation) {
+            if (
+                userRelation.state == 'accepted' &&
+                friendRelation.state == 'accepted'
+            ) {
+                res.status(200).json({ isFriend: true })
+            } else if (
+                userRelation.state == 'pending' &&
+                friendRelation.state == 'requested'
+            ) {
+                res.status(200).json({ isFriend: 'pending' })
+            } else if (
+                userRelation.state == 'requested' &&
+                friendRelation.state == 'pending'
+            ) {
+                res.status(200).json({ isFriend: 'requested' })
+            }
+        } else {
+            res.status(200).json({ isFriend: false })
+        }
+    } catch (err) {
+        res.status(400).json({ message: err.message })
+    }
+}
+
 module.exports = {
     getAllRequests,
     getAllFriends,
     friendRequest,
     acceptFriendRequest,
+    friendStatus,
 }

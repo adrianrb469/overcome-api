@@ -66,6 +66,66 @@ const addFriend = async (req, res) => {
     }
 }
 
+const editInfo = async (req, res) => {
+    // TODO: fix, this is not secure, anyone can edit anyone's info
+    /**
+     * Editable fields:
+     * - name
+     * - lastname
+     * - email
+     * - password
+     * - profilePicture
+     */
+    const { name, lastname, email, password, profilePicture } = req.body
+    const userId = req.params.id
+
+    try {
+        const user = await User.findById(userId)
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' })
+        }
+
+        user.name = name ?? user.name
+        user.lastname = lastname ?? user.lastname
+        user.email = email ?? user.email
+        user.password = password ?? user.password
+        user.profilePicture = profilePicture ?? user.profilePicture
+
+        await user.save()
+
+        res.status(200).json({ message: 'User updated successfully' })
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({ message: 'Internal server error' })
+    }
+}
+
+// Check if some event is saved by the user
+const checkUserEventStatus = async (req, res) => {
+    const user_id = req.params.id
+    const eventId = req.body.event_id
+
+    try {
+        const user = await User.findById(user_id)
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' })
+        }
+
+        const savedEvents = user.savedEvents.map((event) => event.toString())
+
+        if (savedEvents.includes(eventId)) {
+            res.status(200).json({ saved: true })
+        } else {
+            res.status(200).json({ saved: false })
+        }
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({ message: 'Internal server error' })
+    }
+}
+
 const getUserSavedEvents = async ( req, res ) => {
     try {
 
@@ -81,11 +141,14 @@ const getUserSavedEvents = async ( req, res ) => {
     };
 };
 
+
 module.exports = {
     getAllUsers,
     getUserById,
     getCurrentUser,
     saveEvent,
     addFriend,
+    editInfo,
+    checkUserEventStatus,
     getUserSavedEvents,
 }
