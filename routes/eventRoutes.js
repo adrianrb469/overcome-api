@@ -2,8 +2,9 @@ const express = require('express')
 const router = express.Router()
 const eventController = require('../controllers/eventController')
 
+router.get('/search', eventController.searchEvents)
 router.get('/', eventController.getAllEvents)
-router.post('/', eventController.createEvent)
 router.get('/:id', eventController.getEventById)
+router.post('/', eventController.createEvent)
 
 module.exports = router
