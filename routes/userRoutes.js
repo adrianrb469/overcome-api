@@ -11,5 +11,6 @@ router.post('/saveEvent', userController.saveEvent)
 router.post('/addFriend', userController.addFriend)
 // TODO:fix, this is not secure, anyone can edit anyone's info
 router.post('/editInfo/:id', userController.editInfo)
+router.post('/checkEvent/:id', userController.checkUserEventStatus)
 
 module.exports = router

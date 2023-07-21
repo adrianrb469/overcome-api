@@ -101,6 +101,31 @@ const editInfo = async (req, res) => {
     }
 }
 
+// Check if some event is saved by the user
+const checkUserEventStatus = async (req, res) => {
+    const user_id = req.params.id
+    const eventId = req.body.event_id
+
+    try {
+        const user = await User.findById(user_id)
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' })
+        }
+
+        const savedEvents = user.savedEvents.map((event) => event.toString())
+
+        if (savedEvents.includes(eventId)) {
+            res.status(200).json({ saved: true })
+        } else {
+            res.status(200).json({ saved: false })
+        }
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({ message: 'Internal server error' })
+    }
+}
+
 module.exports = {
     getAllUsers,
     getUserById,
@@ -108,4 +133,5 @@ module.exports = {
     saveEvent,
     addFriend,
     editInfo,
+    checkUserEventStatus,
 }
