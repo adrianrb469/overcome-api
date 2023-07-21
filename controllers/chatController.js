@@ -43,8 +43,7 @@ const getLastChatsByUserId = async ( req, res ) => {
 
         const recentChats = response.map( chat => {
             const lastMessage = chat.messages
-                .sort((a, b) => new Date(a.sent_at) - new Date(b.sent_at))
-                .find( msg => msg.user == userId );
+                .sort((a, b) => new Date(b.sent_at) - new Date(a.sent_at))
 
             return Event.findOne({ 'chat': chat._id })
                 .then( event => {
@@ -52,9 +51,11 @@ const getLastChatsByUserId = async ( req, res ) => {
                         return ({
                             _id: chat._id,
                             event: event._id,
-                            message: {
-                                ...lastMessage.toObject(),
-                            },
+                            eventTitle: event.title,
+                            messages: [
+                                ...lastMessage.slice(0,3)
+                            ]
+                            ,
                         });
                     };
                     return null;
