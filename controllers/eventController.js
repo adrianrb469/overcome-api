@@ -4,7 +4,7 @@ const Chat = require('../models/chatModel')
 const getAllEvents = async (req, res) => {
     console.log(req.query)
     try {
-        const { offset = 0, limit = 10 } = req.query
+        const { offset = 0, limit = 15 } = req.query
         console.log(offset, limit)
         const events = await Event.find({})
             .skip(parseInt(offset))
@@ -56,8 +56,42 @@ const getEventById = async (req, res) => {
     }
 }
 
+const searchEvents = async (req, res) => {
+    const { title, tags, startDate, endDate } = req.query
+
+    try {
+        const query = {}
+
+        // Build the query based on the user's input
+        if (title) {
+            // Search by title (case-insensitive)
+            query.title = { $regex: new RegExp(title, 'i') }
+        }
+
+        if (tags) {
+            // Search by tags (split by comma and remove leading/trailing spaces)
+            const tagsArray = tags.split(',').map((tag) => tag.trim())
+            query.tags = { $in: tagsArray }
+        }
+
+        if (startDate && endDate) {
+            // Search by date range
+            query.date = { $gte: startDate, $lte: endDate }
+        }
+
+        // Perform the search using the built query
+        const events = await Event.find(query)
+
+        res.json(events)
+    } catch (error) {
+        console.log(error)
+        res.status(500).send('Error fetching events from the database')
+    }
+}
+
 module.exports = {
     getAllEvents,
     createEvent,
     getEventById,
+    searchEvents,
 }
