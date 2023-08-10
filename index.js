@@ -43,8 +43,8 @@ app.use('/relations', userRelationRoutes)
 /*
 Checking middleware
 app.use((req, res, next) => {
-    console.log(req.headers.cookie)
-    console.log(req.cookies)
+    (req.headers.cookie)
+    (req.cookies)
     next()
 })
 */
@@ -57,8 +57,9 @@ mongoose
     .catch((err) => console.error(err))
 
 mongoose.connection.once('open', () => {
-    console.log('Connected to database')
+    ;('Connected to database')
     const server = app.listen(process.env.PORT, () => {
-        console.log('Server is running on port', server.address().port)
+        'Server is running on port', server.address().port
     })
 })
+module.exports = app

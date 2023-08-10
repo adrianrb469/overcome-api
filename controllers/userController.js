@@ -13,7 +13,7 @@ const getAllUsers = async (req, res) => {
 }
 
 const getUserById = async (req, res) => {
-    console.log(req.params)
+    req.params
     try {
         const user = await User.findOne({ _id: req.params.id })
             .populate('savedEvents')
@@ -26,7 +26,7 @@ const getUserById = async (req, res) => {
 }
 
 const getCurrentUser = async (req, res) => {
-    console.log(req.user)
+    req.user
     try {
         const user = await User.findOne({ _id: req.user._id })
 
@@ -126,21 +126,17 @@ const checkUserEventStatus = async (req, res) => {
     }
 }
 
-const getUserSavedEvents = async ( req, res ) => {
+const getUserSavedEvents = async (req, res) => {
     try {
+        const { id } = req.params
 
-        const { id } = req.params;
+        const events = await User.findById(id).populate('savedEvents')
 
-        const events = await User.findById(id).populate(
-            'savedEvents'
-        );
-
-        res.status(200).json(events);
+        res.status(200).json(events)
     } catch (error) {
         res.status(500).send('Error fetching events from database')
-    };
-};
-
+    }
+}
 
 module.exports = {
     getAllUsers,

@@ -4,7 +4,7 @@
     "description": "Backend of the Overcome web application using Express JS",
     "main": "index.js",
     "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1",
+        "test": "mocha test/events.test.js",
         "dev": "nodemon src/index.js"
     },
     "author": "",
@@ -20,6 +20,11 @@
         "nodemon": "^2.0.22"
     },
     "devDependencies": {
-        "prettier": "^2.8.7"
+        "chai": "^4.3.7",
+        "chai-http": "^4.4.0",
+        "mocha": "^10.2.0",
+        "mongodb-memory-server": "^8.13.0",
+        "prettier": "^2.8.7",
+        "supertest": "^6.3.3"
     }
 }

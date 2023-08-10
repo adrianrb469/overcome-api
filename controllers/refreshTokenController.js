@@ -3,15 +3,14 @@ const User = require('../models/userModel')
 
 const handleRefreshToken = async (req, res) => {
     try {
-        console.log(req.cookies)
+        req.cookies
         const cookies = req.cookies
 
         if (!cookies?.jwt) {
             return res.sendStatus(401)
         }
 
-        const refreshToken = cookies.jwt
-        console.log(refreshToken)
+        const refreshToken = cookies.jwt(refreshToken)
         const foundUser = await User.findOne({
             refreshToken: refreshToken,
         }).exec()
@@ -35,7 +34,7 @@ const handleRefreshToken = async (req, res) => {
             }
         )
     } catch (error) {
-        console.log(error)
+        error
         return res.status(500).json({ message: 'Server error' })
     }
 }

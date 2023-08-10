@@ -3,34 +3,30 @@ const Chat = require('../models/chatModel')
 const mongoose = require('mongoose')
 
 const getAllRequests = async (req, res) => {
-    console.log('getAllRequests')
+    ;('getAllRequests')
     try {
-        console.log('getAllRequests', req.params.id)
+        'getAllRequests', req.params.id
         const user = await User.findOne({ _id: req.params.id }).populate(
             'relations.user'
-        )
-
-        console.log('getAllRequests', user.relations)
+        )('getAllRequests', user.relations)
         const requests = user?.relations.filter(
             (relation) => relation.state === 'requested'
         )
 
         res.json(requests)
     } catch (err) {
-        console.log(err)
+        err
         res.status(500).json({ message: err.message })
     }
 }
 
 const getAllFriends = async (req, res) => {
-    console.log('getAllFriends')
+    ;('getAllFriends')
     try {
-        console.log('getAllFriends', req.params.id)
+        'getAllFriends', req.params.id
         const user = await User.findOne({ _id: req.params.id }).populate(
             'relations.user'
-        )
-
-        console.log('getAllFriends', user.relations)
+        )('getAllFriends', user.relations)
         const requests = user?.relations.filter(
             (relation) => relation.state === 'accepted'
         )
@@ -42,7 +38,7 @@ const getAllFriends = async (req, res) => {
 
 // ready!
 const friendRequest = async (req, res) => {
-    console.log('friendRequest 2')
+    ;('friendRequest 2')
     try {
         // envia
         const firstUser = await User.findById(req.body.first_user_id)
@@ -87,7 +83,7 @@ const friendRequest = async (req, res) => {
             })
         }
     } catch (err) {
-        console.log(err)
+        err
         res.status(500).json({ message: err.message })
     }
 }
