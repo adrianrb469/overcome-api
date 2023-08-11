@@ -2,16 +2,16 @@ const Chat = require('../models/chatModel')
 const Event = require('../models/eventModel')
 const User = require('../models/userModel')
 
+
 const getChatById = async (req, res) => {
     try {
         const chat = await Chat.findById(req.params.id).populate(
             'messages.user',
             'username'
         )
-        console.log('chat', chat)
         res.status(200).json(chat)
     } catch (error) {
-        console.log('chat error', error)
+        'chat error', error
         res.status(500).send('Error fetching chat from database')
     }
 }

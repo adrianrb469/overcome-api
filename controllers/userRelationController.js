@@ -5,19 +5,16 @@ const mongoose = require('mongoose')
 const getAllRequests = async (req, res) => {
     console.log('getAllRequests')
     try {
-        console.log('getAllRequests', req.params.id)
         const user = await User.findOne({ _id: req.params.id }).populate(
             'relations.user'
         )
 
-        console.log('getAllRequests', user.relations)
         const requests = user?.relations.filter(
             (relation) => relation.state === 'requested'
         )
 
         res.json(requests)
     } catch (err) {
-        console.log(err)
         res.status(500).json({ message: err.message })
     }
 }
@@ -25,12 +22,9 @@ const getAllRequests = async (req, res) => {
 const getAllFriends = async (req, res) => {
     console.log('getAllFriends')
     try {
-        console.log('getAllFriends', req.params.id)
         const user = await User.findOne({ _id: req.params.id }).populate(
             'relations.user'
-        )
-
-        console.log('getAllFriends', user.relations)
+        )   
         const requests = user?.relations.filter(
             (relation) => relation.state === 'accepted'
         )
@@ -179,10 +173,40 @@ const friendStatus = async (req, res) => {
     }
 }
 
+const removeFriend = async ( req, res ) => {
+    try {
+        const firstUser = await User.findById(req.body.first_user_id);
+        const secondUser = await User.findById(req.body.second_user_id);
+
+        const firstUserRelationIndex = firstUser.relations.findIndex(
+            (relation) => relation.user.toString() === secondUser._id.toString()
+        );
+
+        const secondUserRelationIndex = secondUser.relations.findIndex(
+            (relation) => relation.user.toString() === firstUser._id.toString()
+        );
+
+        if (firstUserRelationIndex !== -1 && secondUserRelationIndex !== -1) {
+            firstUser.relations.splice(firstUserRelationIndex, 1);
+            secondUser.relations.splice(secondUserRelationIndex, 1);
+
+            await firstUser.save();
+            await secondUser.save();
+
+            res.status(200).json({ message: 'Friend removed successfully' });
+        } else {
+            res.status(404).json({ message: 'Friend relation not found' });
+        };
+    } catch ( error ) {
+        res.status(500).json({ message: error.message });
+    };
+};
+
 module.exports = {
     getAllRequests,
     getAllFriends,
     friendRequest,
     acceptFriendRequest,
     friendStatus,
+    removeFriend,
 }

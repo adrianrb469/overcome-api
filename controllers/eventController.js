@@ -2,10 +2,8 @@ const Event = require('../models/eventModel')
 const Chat = require('../models/chatModel')
 
 const getAllEvents = async (req, res) => {
-    console.log(req.query)
     try {
         const { offset = 0, limit = 15 } = req.query
-        console.log(offset, limit)
         const events = await Event.find({})
             .skip(parseInt(offset))
             .limit(parseInt(limit))
@@ -14,6 +12,15 @@ const getAllEvents = async (req, res) => {
         res.status(200).json(events)
     } catch (error) {
         res.status(500).send('Error fetching events from database')
+    }
+}
+
+const countEvents = async (req, res) => {
+    try {
+        const count = await Event.countDocuments({})
+        res.status(200).json(count)
+    } catch (error) {
+        res.status(500).send('Error counting events from database')
     }
 }
 
@@ -89,13 +96,14 @@ const searchEvents = async (req, res) => {
 
         res.json(events)
     } catch (error) {
-        console.log(error)
+        error
         res.status(500).send('Error fetching events from the database')
     }
 }
 
 module.exports = {
     getAllEvents,
+    countEvents,
     createEvent,
     getEventById,
     searchEvents,

@@ -13,7 +13,7 @@ const handleNewUser = async (req, res) => {
 
     if (duplicate)
         return res.status(409).json({ message: 'Username already exists' })
-    
+
     try {
         const { username, name, lastname, email, password } = req.body
         // Hash password
@@ -33,7 +33,7 @@ const handleNewUser = async (req, res) => {
             message: `User ${username} created successfully`,
         })
     } catch (error) {
-        console.log(error)
+        error
         res.status(500).json({ message: 'Server error' })
     }
 }

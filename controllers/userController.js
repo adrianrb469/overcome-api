@@ -13,7 +13,7 @@ const getAllUsers = async (req, res) => {
 }
 
 const getUserById = async (req, res) => {
-    console.log(req.params)
+    req.params
     try {
         const user = await User.findOne({ _id: req.params.id })
             .populate('savedEvents')
@@ -26,7 +26,7 @@ const getUserById = async (req, res) => {
 }
 
 const getCurrentUser = async (req, res) => {
-    console.log(req.user)
+    req.user
     try {
         const user = await User.findOne({ _id: req.user._id })
 
@@ -133,6 +133,7 @@ const getUserSavedEvents = async (req, res) => {
         const events = await User.findById(id).populate('savedEvents')
 
         res.status(200).json(events)
+
     } catch (error) {
         res.status(500).send('Error fetching events from database')
     }
@@ -182,6 +183,35 @@ const updateNotifications = async (req, res) => {
     }
 }
 
+
+
+const removeSavedEvent = async ( req, res ) => {
+    try {
+        const { user_id, event_id } = req.body;
+
+        const user = await User.findOne({ _id: user_id });
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        };
+
+        const eventIndex = user.savedEvents.findIndex(
+            (eventId) => eventId.toString() === event_id
+        );
+
+        if (eventIndex !== -1) {
+            user.savedEvents.splice(eventIndex, 1);
+            await user.save();
+
+            res.status(200).json({ message: 'Event removed from saved events' });
+        } else {
+            res.status(404).json({ message: 'Event not found in saved events' });
+        }
+    } catch (error) {
+        res.status(500).json({ message: err.message });
+    };
+};
+
 module.exports = {
     getAllUsers,
     getUserById,
@@ -193,4 +223,5 @@ module.exports = {
     getUserSavedEvents,
     getNotifications,
     updateNotifications,
+    removeSavedEvent,
 }
