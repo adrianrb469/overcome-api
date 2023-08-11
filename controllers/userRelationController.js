@@ -155,10 +155,40 @@ const friendStatus = async (req, res) => {
     }
 }
 
+const removeFriend = async ( req, res ) => {
+    try {
+        const firstUser = await User.findById(req.body.first_user_id);
+        const secondUser = await User.findById(req.body.second_user_id);
+
+        const firstUserRelationIndex = firstUser.relations.findIndex(
+            (relation) => relation.user.toString() === secondUser._id.toString()
+        );
+
+        const secondUserRelationIndex = secondUser.relations.findIndex(
+            (relation) => relation.user.toString() === firstUser._id.toString()
+        );
+
+        if (firstUserRelationIndex !== -1 && secondUserRelationIndex !== -1) {
+            firstUser.relations.splice(firstUserRelationIndex, 1);
+            secondUser.relations.splice(secondUserRelationIndex, 1);
+
+            await firstUser.save();
+            await secondUser.save();
+
+            res.status(200).json({ message: 'Friend removed successfully' });
+        } else {
+            res.status(404).json({ message: 'Friend relation not found' });
+        };
+    } catch ( error ) {
+        res.status(500).json({ message: error.message });
+    };
+};
+
 module.exports = {
     getAllRequests,
     getAllFriends,
     friendRequest,
     acceptFriendRequest,
     friendStatus,
+    removeFriend,
 }
