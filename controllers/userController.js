@@ -151,7 +151,11 @@ const getNotifications = async (req, res) => {
             (notification) => notification.show
         )
 
-        res.status(200).json(notifications)
+        const unreadCount = user.notifications.filter(
+            (notification) => notification.show && !notification.read
+        ).length
+
+        res.status(200).json({ notifications, unreadCount })
     } catch (error) {
         console.error(error)
         res.status(500).json({ message: 'Internal server error' })

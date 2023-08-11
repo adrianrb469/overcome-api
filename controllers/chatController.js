@@ -25,19 +25,20 @@ const newMessage = async (req, res) => {
             sent_at: Date.now(),
         }
 
-        const updatedChat = await Chat.findByIdAndUpdate(
-            chat_id,
-            { $push: { messages: messageData } },
-            { new: true }
-        )
+        let updatedChat = await Chat.findById(chat_id)
 
-        // notification to chat participants
+        if (!updatedChat.participants.includes(user_id)) {
+            updatedChat.participants.push(user_id)
+        }
+
+        updatedChat = await updatedChat.save()
+
         const chatParticipants = updatedChat.participants.filter(
             (participant) => participant !== user_id
         )
 
         let notificationData = {
-            type: 'chat',
+            type: 'chat_private',
             message: `${username} sent a message`,
             user_id,
         }
@@ -48,7 +49,6 @@ const newMessage = async (req, res) => {
             notificationData.type = 'chat_event'
         }
 
-        // send notification to chat participants
         await Promise.all(
             chatParticipants.map(async (participant) => {
                 const updatedUser = await User.findByIdAndUpdate(

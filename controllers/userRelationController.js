@@ -65,6 +65,7 @@ const friendRequest = async (req, res) => {
             const chat = await Chat.create({
                 type: 'private',
                 messages: [],
+                participants: [firstUser._id, secondUser._id],
             })
 
             firstUser.relations.push({
