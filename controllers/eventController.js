@@ -33,6 +33,7 @@ const createEvent = async (req, res) => {
             tags: req.body.tags,
             link: req.body.link,
             creator: req.body.creator,
+            limit: req.body.limit,
         })
 
         res.status(201).json(event)
@@ -87,9 +88,41 @@ const searchEvents = async (req, res) => {
     }
 }
 
+// TODO Join users controller and his verification
+// const joinEvent = async (req, res) => {
+//   try {
+//     const event = await Event.findById(req.params.id)
+//       .populate('participants', 'username')
+//   } catch (error) {
+//     console.error(error)
+//     res.status(500).send('Error joining event')
+//   }
+// }
+const joinEvent = async (req, res) => {
+  try {
+    const eventId = req.params.id // Get the event ID from the request parameters
+    const userId = req.body.userId // Get the user ID from the request body
+
+    // Find the event by ID and update the participants array
+    const event = await Event.findByIdAndUpdate(
+      eventId,
+      { $push: { participants: userId } },
+      { new: true }
+    )
+      .populate('participants', 'username')
+      .populate('creator', 'username')
+
+    res.status(200).json(event)
+  } catch (error) {
+    console.error(error)
+    res.status(500).send('Error joining event')
+  }
+}
+
 module.exports = {
     getAllEvents,
     createEvent,
     getEventById,
     searchEvents,
+    joinEvent,
 }
