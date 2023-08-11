@@ -30,6 +30,13 @@ const userSchema = new mongoose.Schema({
         { type: mongoose.Schema.Types.ObjectId, ref: 'Event', unique: true },
     ],
     profilePicture: { type: String, required: false },
+    notifications: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Notification',
+            unique: true,
+        },
+    ],
 })
 
 const User = mongoose.model('User', userSchema)
