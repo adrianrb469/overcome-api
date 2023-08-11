@@ -32,9 +32,39 @@ const userSchema = new mongoose.Schema({
     profilePicture: { type: String, required: false },
     notifications: [
         {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'Notification',
-            unique: true,
+            message: {
+                type: String,
+                required: true,
+            },
+            read: {
+                type: Boolean,
+                default: false,
+            },
+            date: {
+                type: Date,
+                default: Date.now,
+                required: true,
+            },
+            show: {
+                type: Boolean,
+                default: true,
+            },
+            type: {
+                type: String,
+                required: true,
+            },
+            user_id: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'User',
+            },
+            chat_id: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'Chat',
+            },
+            event_id: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'Event',
+            },
         },
     ],
 })

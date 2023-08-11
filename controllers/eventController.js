@@ -21,6 +21,7 @@ const createEvent = async (req, res) => {
     try {
         // Create the chat associated with the event
         const chat = await Chat.create({
+            type: 'event',
             messages: [],
         })
 
@@ -36,6 +37,10 @@ const createEvent = async (req, res) => {
             link: req.body.link,
             creator: req.body.creator,
         })
+
+        // add event id to chat
+        chat.event_id = event._id
+        await chat.save()
 
         res.status(201).json(event)
     } catch (error) {

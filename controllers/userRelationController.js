@@ -63,6 +63,7 @@ const friendRequest = async (req, res) => {
         } else {
             // Create chat
             const chat = await Chat.create({
+                type: 'private',
                 messages: [],
             })
 
@@ -75,6 +76,14 @@ const friendRequest = async (req, res) => {
             secondUser.relations.push({
                 user: firstUser._id,
                 state: 'requested',
+                chat_id: chat._id,
+            })
+
+            // notification
+            secondUser.notifications.push({
+                message: `${firstUser.name} sent you a friend request`,
+                type: 'friend_request',
+                user_id: firstUser._id,
                 chat_id: chat._id,
             })
 
@@ -110,6 +119,14 @@ const acceptFriendRequest = async (req, res) => {
         if (accepterRelation && requesterRelation) {
             accepterRelation.state = 'accepted'
             requesterRelation.state = 'accepted'
+
+            // notification
+            requesterUser.notifications.push({
+                message: `${accepterUser.name} accepted your friend request`,
+                type: 'friend_request_accepted',
+                user_id: accepterUser._id,
+                chat_id: accepterRelation.chat_id,
+            })
 
             await accepterUser.save()
             await requesterUser.save()

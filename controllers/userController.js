@@ -126,21 +126,17 @@ const checkUserEventStatus = async (req, res) => {
     }
 }
 
-const getUserSavedEvents = async ( req, res ) => {
+const getUserSavedEvents = async (req, res) => {
     try {
+        const { id } = req.params
 
-        const { id } = req.params;
+        const events = await User.findById(id).populate('savedEvents')
 
-        const events = await User.findById(id).populate(
-            'savedEvents'
-        );
-
-        res.status(200).json(events);
+        res.status(200).json(events)
     } catch (error) {
         res.status(500).send('Error fetching events from database')
-    };
-};
-
+    }
+}
 
 module.exports = {
     getAllUsers,
