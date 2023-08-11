@@ -15,4 +15,7 @@ router.post('/addFriend', userController.addFriend)
 router.post('/editInfo/:id', userController.editInfo)
 router.post('/checkEvent/:id', userController.checkUserEventStatus)
 
+router.get('/getNotifications/:id', userController.getNotifications)
+router.post('/updateNotifications/:id', userController.updateNotifications)
+
 module.exports = router

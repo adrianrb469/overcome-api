@@ -57,6 +57,7 @@ mongoose
     })
     .catch((err) => console.error(err))
 
+console.log('Connecting to database...')
 mongoose.connection.once('open', () => {
     ;('Connected to database')
     const server = app.listen(process.env.PORT, () => {

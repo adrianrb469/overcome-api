@@ -133,10 +133,57 @@ const getUserSavedEvents = async (req, res) => {
         const events = await User.findById(id).populate('savedEvents')
 
         res.status(200).json(events)
+
     } catch (error) {
         res.status(500).send('Error fetching events from database')
     }
 }
+
+const getNotifications = async (req, res) => {
+    try {
+        const { id } = req.params
+        const user = await User.findById(id)
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' })
+        }
+
+        const notifications = user.notifications.filter(
+            (notification) => notification.show
+        )
+
+        const unreadCount = user.notifications.filter(
+            (notification) => notification.show && !notification.read
+        ).length
+
+        res.status(200).json({ notifications, unreadCount })
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({ message: 'Internal server error' })
+    }
+}
+
+const updateNotifications = async (req, res) => {
+    try {
+        const { id } = req.params
+        const { notifications } = req.body
+        const user = await User.findById(id)
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' })
+        }
+
+        user.notifications = notifications
+        await user.save()
+
+        res.status(200).json({ message: 'Notifications updated successfully' })
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({ message: 'Internal server error' })
+    }
+}
+
+
 
 const removeSavedEvent = async ( req, res ) => {
     try {
@@ -174,5 +221,7 @@ module.exports = {
     editInfo,
     checkUserEventStatus,
     getUserSavedEvents,
+    getNotifications,
+    updateNotifications,
     removeSavedEvent,
 }
