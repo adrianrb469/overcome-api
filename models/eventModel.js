@@ -27,6 +27,7 @@ const eventSchema = new mongoose.Schema({
     link: { type: String, required: false },
     chat: { type: mongoose.Schema.Types.ObjectId, ref: 'Chat' },
     tags: [{ type: String }],
+    limit: { type: Number, required: false },
 })
 
 const Event = mongoose.model('Event', eventSchema)
