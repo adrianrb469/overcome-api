@@ -1,5 +1,6 @@
 const Chat = require('../models/chatModel')
 const Event = require('../models/eventModel')
+const User = require('../models/userModel')
 
 const getChatById = async (req, res) => {
     try {
@@ -17,7 +18,7 @@ const getChatById = async (req, res) => {
 
 const newMessage = async (req, res) => {
     try {
-        const { chat_id, user_id, username, message } = req.body
+        const { chat_id, user_id, message } = req.body
 
         const messageData = {
             user: user_id,
@@ -25,17 +26,23 @@ const newMessage = async (req, res) => {
             sent_at: Date.now(),
         }
 
-        let updatedChat = await Chat.findById(chat_id)
+        const updatedChat = await Chat.findByIdAndUpdate(
+            chat_id,
+            { $push: { messages: messageData } },
+            { new: true }
+        )
 
         if (!updatedChat.participants.includes(user_id)) {
             updatedChat.participants.push(user_id)
         }
 
-        updatedChat = await updatedChat.save()
-
         const chatParticipants = updatedChat.participants.filter(
             (participant) => participant !== user_id
         )
+
+        // get username of based on user_id
+        const user = await User.findById(user_id)
+        const username = user.username
 
         let notificationData = {
             type: 'chat_private',
