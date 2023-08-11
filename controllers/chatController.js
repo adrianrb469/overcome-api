@@ -37,7 +37,7 @@ const newMessage = async (req, res) => {
         }
 
         const chatParticipants = updatedChat.participants.filter(
-            (participant) => participant !== user_id
+            (participant) => participant != user_id
         )
 
         // get username of based on user_id
