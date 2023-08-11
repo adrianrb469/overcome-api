@@ -24,7 +24,7 @@ const getAllFriends = async (req, res) => {
     try {
         const user = await User.findOne({ _id: req.params.id }).populate(
             'relations.user'
-        )
+        )   
         const requests = user?.relations.filter(
             (relation) => relation.state === 'accepted'
         )

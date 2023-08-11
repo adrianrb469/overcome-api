@@ -15,6 +15,15 @@ const getAllEvents = async (req, res) => {
     }
 }
 
+const countEvents = async (req, res) => {
+    try {
+        const count = await Event.countDocuments({})
+        res.status(200).json(count)
+    } catch (error) {
+        res.status(500).send('Error counting events from database')
+    }
+}
+
 const createEvent = async (req, res) => {
     try {
         // Create the chat associated with the event
@@ -89,6 +98,7 @@ const searchEvents = async (req, res) => {
 
 module.exports = {
     getAllEvents,
+    countEvents,
     createEvent,
     getEventById,
     searchEvents,
