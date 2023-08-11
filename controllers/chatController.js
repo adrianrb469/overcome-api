@@ -6,7 +6,7 @@ const getChatById = async (req, res) => {
         const chat = await Chat.findById(req.params.id).populate(
             'messages.user',
             'username'
-        )('chat', chat)
+        )
         res.status(200).json(chat)
     } catch (error) {
         'chat error', error
