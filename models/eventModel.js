@@ -1,5 +1,6 @@
 const mongoose = require('mongoose')
 
+//I will do the event users limit!
 const eventSchema = new mongoose.Schema({
     title: { type: String, required: true },
     creator: {
