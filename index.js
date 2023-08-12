@@ -59,9 +59,8 @@ mongoose
 
 console.log('Connecting to database...')
 mongoose.connection.once('open', () => {
-    ;('Connected to database')
     const server = app.listen(process.env.PORT, () => {
-        'Server is running on port', server.address().port
+        console.log('Server is running on port', server.address().port)
     })
 })
 module.exports = app
