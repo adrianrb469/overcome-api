@@ -16,13 +16,11 @@ require('dotenv').config()
 
 app.use(
     cors({
-        origin: 'http://127.0.0.1:4444',
         credentials: true,
     })
 )
 
 app.use(function (req, res, next) {
-    res.header('Access-Control-Allow-Origin', 'http://127.0.0.1:4444')
     res.header('Access-Control-Allow-Credentials', true)
     res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
     res.header('Access-Control-Allow-Headers', '*')
