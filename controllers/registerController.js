@@ -33,7 +33,7 @@ const handleNewUser = async (req, res) => {
             message: `User ${username} created successfully`,
         })
     } catch (error) {
-        error
+        console.log(error)
         res.status(500).json({ message: 'Server error' })
     }
 }

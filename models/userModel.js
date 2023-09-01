@@ -15,12 +15,12 @@ const userSchema = new mongoose.Schema({
         { type: mongoose.Schema.Types.ObjectId, ref: 'Event', unique: true },
     ],
     relations: [
-        // User id and state string (pending, accepted, rejected, blocked ) and chat_id
         {
             user: {
                 type: mongoose.Schema.Types.ObjectId,
                 ref: 'User',
                 unique: true,
+                sparse: true,
             },
             state: { type: String, default: 'pending', required: true },
             chat_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Chat' },
