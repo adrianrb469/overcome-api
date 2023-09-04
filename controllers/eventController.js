@@ -136,6 +136,113 @@ const joinEvent = async (req, res) => {
   }
 };
 
+const checkUserJoinedStatus = async (req, res) => {
+  try {
+    const eventId = req.params.id
+    const userId = req.body.userId
+
+    const event = await Event.findById(eventId)
+
+    if(event.participants.includes(userId)) {
+      res.status(200).json({ joined: true })
+    } else {
+      res.status(200).json({ joined: false })
+    }
+
+  } catch (error) {
+    console.log(error)
+    res.status(500).send('Error checking user joined status')
+  }
+}
+
+// const removeJoinedEvent = async (req, res) => {
+//   try {
+//     const eventId = req.params.id; // Get the event ID from the request parameters
+//     const userId = req.body.userId; // Get the user ID from the request body
+
+//     // Find the event by ID
+//     const event = await Event.findById(eventId);
+
+//     // Check if the user is already a participant in the event
+//     if (event.participants.includes(userId)) {
+//       // res.status(400).json({ message: 'User is already a participant in this event' });
+//       event.participants.pull(userId);
+//     } else {
+//       if (event.limit && event.participants.length >= event.limit) {
+//         res.status(400).json({ message: 'Event has reached the participant limit' });
+//       } else {
+//         // Add the user to the participants array and save the updated event
+//         event.participants.push(userId);
+//         const updatedEvent = await event.save();
+
+//         // Populate the participant and creator fields of the updated event
+//         const populatedEvent = await updatedEvent
+//           .populate('participants', 'username')
+//           .populate('creator', 'username')
+//           .execPopulate();
+
+//         res.status(200).json(populatedEvent);
+//       }
+//     }
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).send('Error joining event');
+//   }
+// };
+
+// const removeJoinedEvent = async (req, res) => {
+//   try {
+//     const eventId = req.params.id; // Get the event ID from the request parameters
+//     const userId = req.body.userId; // Get the user ID from the request body
+
+//     // Find the event by ID
+//     const event = await Event.findById(eventId);
+
+//     // Check if the user is a participant in the event
+//     if (!event.participants.includes(userId)) {
+//       res.status(400).json({ message: 'User is not a participant in this event' });
+//     } else {
+//       // Remove the user from the participants array and save the updated event
+//       event.participants = event.participants.filter(participantId => participantId !== userId);
+//       const updatedEvent = await event.save();
+
+//       // Populate the participant and creator fields of the updated event
+//       const populatedEvent = await updatedEvent
+//         .populate('participants', 'username')
+//         .populate('creator', 'username')
+//         .execPopulate();
+
+//       res.status(200).json(populatedEvent);
+//     }
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).send('Error removing user from event');
+//   }
+// };
+
+const removeJoinedEvent = async (req, res) => {
+  try {
+    const eventId = req.params.id; // Get the event ID from the request parameters
+    const userId = req.body.userId; // Get the user ID from the request body
+
+    // Remove the user from the participants array using $pull
+    const updatedEvent = await Event.findByIdAndUpdate(
+      eventId,
+      { $pull: { participants: userId } },
+      { new: true }
+    ).populate('participants', 'username').populate('creator', 'username');
+
+    if (!updatedEvent) {
+      res.status(404).json({ message: 'Event not found' });
+    } else {
+      res.status(200).json(updatedEvent);
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Error removing user from event');
+  }
+};
+
 module.exports = {
     getAllEvents,
     countEvents,
@@ -143,4 +250,6 @@ module.exports = {
     getEventById,
     searchEvents,
     joinEvent,
+    checkUserJoinedStatus,
+    removeJoinedEvent
 }
