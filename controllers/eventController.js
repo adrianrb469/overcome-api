@@ -140,6 +140,48 @@ const joinEvent = async (req, res) => {
     }
 }
 
+const checkUserJoinedStatus = async (req, res) => {
+  try {
+    const eventId = req.params.id
+    const userId = req.body.userId
+
+    const event = await Event.findById(eventId)
+
+    if(event.participants.includes(userId)) {
+      res.status(200).json({ joined: true })
+    } else {
+      res.status(200).json({ joined: false })
+    }
+
+  } catch (error) {
+    console.log(error)
+    res.status(500).send('Error checking user joined status')
+  }
+}
+
+const removeJoinedEvent = async (req, res) => {
+  try {
+    const eventId = req.params.id; // Get the event ID from the request parameters
+    const userId = req.body.userId; // Get the user ID from the request body
+
+    // Remove the user from the participants array using $pull
+    const updatedEvent = await Event.findByIdAndUpdate(
+      eventId,
+      { $pull: { participants: userId } },
+      { new: true }
+    ).populate('participants', 'username').populate('creator', 'username');
+
+    if (!updatedEvent) {
+      res.status(404).json({ message: 'Event not found' });
+    } else {
+      res.status(200).json(updatedEvent);
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Error removing user from event');
+  }
+};
+
 module.exports = {
     getAllEvents,
     countEvents,
@@ -147,4 +189,6 @@ module.exports = {
     getEventById,
     searchEvents,
     joinEvent,
+    checkUserJoinedStatus,
+    removeJoinedEvent
 }
