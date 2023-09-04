@@ -8,5 +8,7 @@ router.get('/count', eventController.countEvents)
 router.get('/:id', eventController.getEventById)
 router.post('/', eventController.createEvent)
 router.post('/joinEvent/:id', eventController.joinEvent)
+router.post('/checkJoinedStatus/:id', eventController.checkUserJoinedStatus)
+router.post('/removeJoinedEvent/:id', eventController.removeJoinedEvent)
 
 module.exports = router
