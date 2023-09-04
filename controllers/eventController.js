@@ -103,38 +103,42 @@ const searchEvents = async (req, res) => {
 }
 
 const joinEvent = async (req, res) => {
-  try {
-    const eventId = req.params.id; // Get the event ID from the request parameters
-    const userId = req.body.userId; // Get the user ID from the request body
+    try {
+        const eventId = req.params.id // Get the event ID from the request parameters
+        const userId = req.body.userId // Get the user ID from the request body
 
-    // Find the event by ID
-    const event = await Event.findById(eventId);
+        // Find the event by ID
+        const event = await Event.findById(eventId)
 
-    // Check if the user is already a participant in the event
-    if (event.participants.includes(userId)) {
-      res.status(400).json({ message: 'User is already a participant in this event' });
-    } else {
-      if (event.limit && event.participants.length >= event.limit) {
-        res.status(400).json({ message: 'Event has reached the participant limit' });
-      } else {
-        // Add the user to the participants array and save the updated event
-        event.participants.push(userId);
-        const updatedEvent = await event.save();
+        // Check if the user is already a participant in the event
+        if (event.participants.includes(userId)) {
+            res.status(400).json({
+                message: 'User is already a participant in this event',
+            })
+        } else {
+            if (event.limit && event.participants.length >= event.limit) {
+                res.status(400).json({
+                    message: 'Event has reached the participant limit',
+                })
+            } else {
+                // Add the user to the participants array and save the updated event
+                event.participants.push(userId)
+                const updatedEvent = await event.save()
 
-        // Populate the participant and creator fields of the updated event
-        const populatedEvent = await updatedEvent
-          .populate('participants', 'username')
-          .populate('creator', 'username')
-          .execPopulate();
+                // Populate the participant and creator fields of the updated event
+                const populatedEvent = await updatedEvent
+                    .populate('participants', 'username')
+                    .populate('creator', 'username')
+                    .execPopulate()
 
-        res.status(200).json(populatedEvent);
-      }
+                res.status(200).json(populatedEvent)
+            }
+        }
+    } catch (error) {
+        console.error(error)
+        res.status(500).send('Error joining event')
     }
-  } catch (error) {
-    console.error(error);
-    res.status(500).send('Error joining event');
-  }
-};
+}
 
 module.exports = {
     getAllEvents,
