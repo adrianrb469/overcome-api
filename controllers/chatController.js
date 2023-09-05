@@ -51,12 +51,16 @@ const newMessage = async (req, res) => {
 
         let notificationData = {
             type: 'chat_private',
-            message: `${username} sent a message`,
+            message: `New message from ${username}!`,
             user_id,
+            chat_id,
+            username,
         }
 
         if (updatedChat.type === 'event') {
-            notificationData.message = `${username} sent you a message on ${updatedChat.title}`
+            // based on event_id get event title
+            found_event = await Event.findById(updatedChat.event_id)
+            notificationData.message = `New message on ${found_event.title}!`
             notificationData.event_id = updatedChat.event_id
             notificationData.type = 'chat_event'
         }
