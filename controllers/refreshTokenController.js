@@ -2,15 +2,15 @@ const jwt = require('jsonwebtoken')
 const User = require('../models/userModel')
 
 const handleRefreshToken = async (req, res) => {
+    console.log('refresh token')
     try {
-        req.cookies
         const cookies = req.cookies
 
         if (!cookies?.jwt) {
             return res.sendStatus(401)
         }
 
-        const refreshToken = cookies.jwt(refreshToken)
+        const refreshToken = await cookies.jwt
         const foundUser = await User.findOne({
             refreshToken: refreshToken,
         }).exec()
@@ -34,7 +34,7 @@ const handleRefreshToken = async (req, res) => {
             }
         )
     } catch (error) {
-        error
+        console.log(error)
         return res.status(500).json({ message: 'Server error' })
     }
 }
