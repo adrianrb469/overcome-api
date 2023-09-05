@@ -2,7 +2,6 @@ const Chat = require('../models/chatModel')
 const Event = require('../models/eventModel')
 const User = require('../models/userModel')
 
-
 const getChatById = async (req, res) => {
     try {
         const chat = await Chat.findById(req.params.id).populate(
@@ -19,6 +18,12 @@ const getChatById = async (req, res) => {
 const newMessage = async (req, res) => {
     try {
         const { chat_id, user_id, message } = req.body
+
+        // verify user is part of chat
+        const chat = await Chat.findById(chat_id)
+        if (!chat.participants.includes(user_id)) {
+            res.status(400).json({ message: 'User is not part of chat' })
+        }
 
         const messageData = {
             user: user_id,
