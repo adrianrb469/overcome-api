@@ -1,9 +1,7 @@
 const User = require('../models/userModel')
 const Recover = require('../models/recoverModel')
-const resend = require('resend')
+const { Resend } = require('resend')
 const bcrypt = require('bcrypt')
-
-const rs = new resend.Resend(process.env.RESEND_API_KEY)
 
 const generateUniqueCode = () => {
     const code = Math.floor(Math.random() * 900000) + 100000
@@ -11,6 +9,8 @@ const generateUniqueCode = () => {
 }
 
 const sendUniqueCode = async (req, res) => {
+    const resend = new Resend(process.env.RESEND_API_KEY)
+
     try {
         const email = req.body.email
 
@@ -28,7 +28,8 @@ const sendUniqueCode = async (req, res) => {
             const diff = now.getTime() - created_at.getTime()
             const diffMinutes = Math.floor(diff / 60000)
             if (diffMinutes > 2) {
-                await recoverCheck.delete()
+                // filter on Recover to remove the old unique code
+                await Recover.deleteOne({ email })
             } else {
                 return res.status(404).json({
                     message:
@@ -47,7 +48,7 @@ const sendUniqueCode = async (req, res) => {
         const recover = new Recover(recoverData)
         await recover.save()
 
-        const data = await rs.emails.send({
+        const data = await resend.emails.send({
             from: 'Overcome <onboarding@resend.dev>',
             to: [email],
             subject: '¡Código de recuperación de contraseña! 🙊',
@@ -56,11 +57,14 @@ const sendUniqueCode = async (req, res) => {
           <tr>
             <td align="center">
               <img src='https://drive.google.com/uc?id=1t2AKc12EanKhfjs_dIqXgXFk-ySY9l4x' style="height:100px"/>
-              <h1 style="color: #333333; font-size:29px">Hola, <a>${email}:</a></h1>
+              <h1 style="color: #333333; font-size:29px">Hola, <a href="mailto:${email}">${email}</a>:</h1>
               <p style="color: #666666;">Utiliza el código de abajo para recuperar las credenciales de inicio de sesión de tu cuenta de <a href='https://app-overcome.onrender.com' target="_blank">Overcome</a>:</p>
-              <h2 style="background-color: #f4f4f4; width:fit-content; padding: 1rem; border-radius:10px;letter-spacing:10px;margin-bottom:40px;margin-top:40px">
+              <h2 style="background-color: #f4f4f4; width:fit-content; padding: 1rem; border-radius:10px;letter-spacing:10px;margin-bottom:30px;margin-top:30px;padding-right:0.6rem">
                 ${unique_code}
               </h2>
+              <p style="color: ##666666; opacity: 0.7; width: 90%;margin-bottom:20px">
+                El código es de un solo uso y expira en 2 minutos, podrás crear uno nuevo luego de este intervalo.
+              </p>
               <p style="color: ##666666; opacity: 0.5; font-size:90%; width: 90%">Si no estás tratando de recuperar tus credenciales de inicio de sesión en <a href='https://app-overcome.onrender.com' target="_blank">Overcome</a> por favor, ignora este correo electrónico. Es posible que otro usuario haya introducido su información de inicio de sesión de manera incorrecta.</p>
             </td>
           </tr>
@@ -69,7 +73,6 @@ const sendUniqueCode = async (req, res) => {
         })
         res.status(200).json({ data })
     } catch (error) {
-        console.error(error)
         res.status(500).json({ error })
     }
 }
@@ -101,13 +104,21 @@ const verifyUniqueCode = async (req, res) => {
                 .json({ message: 'Incorrect unique code', match: false })
         }
 
+        // check if code has been already used
+        if (recover.is_verified) {
+            await Recover.deleteOne({ email })
+            return res
+                .status(401)
+                .json({ message: 'Unique code already verified', match: false })
+        }
+
         // check if unique code has expired
         const now = new Date()
         const created_at = new Date(recover.created_at)
         const diff = now.getTime() - created_at.getTime()
         const diffMinutes = Math.floor(diff / 60000)
         if (diffMinutes > 2) {
-            await recover.delete()
+            await Recover.deleteOne({ email })
             return res
                 .status(401)
                 .json({ message: 'Unique code has expired', match: false })
@@ -119,7 +130,6 @@ const verifyUniqueCode = async (req, res) => {
 
         res.status(200).json({ message: 'Unique code is correct', match: true })
     } catch (error) {
-        console.error(error)
         res.status(500).json({ error })
     }
 }
@@ -156,12 +166,11 @@ const modifyPassword = async (req, res) => {
         user.password = hashedPassword
         await user.save()
 
-        // delete recover document
-        await recover.delete()
+        // remove recover document
+        await Recover.deleteOne({ email })
 
         res.status(200).json({ message: 'Password modified successfully' })
     } catch (error) {
-        console.error(error)
         res.status(500).json({ error })
     }
 }
