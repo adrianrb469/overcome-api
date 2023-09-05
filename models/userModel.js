@@ -65,6 +65,10 @@ const userSchema = new mongoose.Schema({
                 type: mongoose.Schema.Types.ObjectId,
                 ref: 'Event',
             },
+            username: {
+                type: String,
+                required: false,
+            },
         },
     ],
 })

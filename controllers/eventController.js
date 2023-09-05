@@ -123,13 +123,17 @@ const joinEvent = async (req, res) => {
             } else {
                 // Add the user to the participants array and save the updated event
                 event.participants.push(userId)
-                const updatedEvent = await event.save()
+                await event.save()
+
+                // update chat participants
+                const chat = await Chat.findById(event.chat)
+                chat.participants.push(userId)
+                await chat.save()
 
                 // Populate the participant and creator fields of the updated event
-                const populatedEvent = await updatedEvent
+                const populatedEvent = await Event.findById(eventId)
                     .populate('participants', 'username')
                     .populate('creator', 'username')
-                    .execPopulate()
 
                 res.status(200).json(populatedEvent)
             }
@@ -141,46 +145,54 @@ const joinEvent = async (req, res) => {
 }
 
 const checkUserJoinedStatus = async (req, res) => {
-  try {
-    const eventId = req.params.id
-    const userId = req.body.userId
+    try {
+        const eventId = req.params.id
+        const userId = req.body.userId
 
-    const event = await Event.findById(eventId)
+        const event = await Event.findById(eventId)
 
-    if(event.participants.includes(userId)) {
-      res.status(200).json({ joined: true })
-    } else {
-      res.status(200).json({ joined: false })
+        if (event.participants.includes(userId)) {
+            res.status(200).json({ joined: true })
+        } else {
+            res.status(200).json({ joined: false })
+        }
+    } catch (error) {
+        console.log(error)
+        res.status(500).send('Error checking user joined status')
     }
-
-  } catch (error) {
-    console.log(error)
-    res.status(500).send('Error checking user joined status')
-  }
 }
 
 const removeJoinedEvent = async (req, res) => {
-  try {
-    const eventId = req.params.id; // Get the event ID from the request parameters
-    const userId = req.body.userId; // Get the user ID from the request body
+    try {
+        const eventId = req.params.id // Get the event ID from the request parameters
+        const userId = req.body.userId // Get the user ID from the request body
 
-    // Remove the user from the participants array using $pull
-    const updatedEvent = await Event.findByIdAndUpdate(
-      eventId,
-      { $pull: { participants: userId } },
-      { new: true }
-    ).populate('participants', 'username').populate('creator', 'username');
+        // Remove the user from the participants array using $pull
+        const updatedEvent = await Event.findByIdAndUpdate(
+            eventId,
+            { $pull: { participants: userId } },
+            { new: true }
+        )
+            .populate('participants', 'username')
+            .populate('creator', 'username')
 
-    if (!updatedEvent) {
-      res.status(404).json({ message: 'Event not found' });
-    } else {
-      res.status(200).json(updatedEvent);
+        if (!updatedEvent) {
+            res.status(404).json({ message: 'Event not found' })
+        } else {
+            // update chat participants
+            const chat = await Chat.findById(updatedEvent.chat)
+            chat.participants = chat.participants.filter(
+                (participant) => participant != userId
+            )
+            await chat.save()
+
+            res.status(200).json(updatedEvent)
+        }
+    } catch (error) {
+        console.error(error)
+        res.status(500).send('Error removing user from event')
     }
-  } catch (error) {
-    console.error(error);
-    res.status(500).send('Error removing user from event');
-  }
-};
+}
 
 module.exports = {
     getAllEvents,
@@ -190,5 +202,5 @@ module.exports = {
     searchEvents,
     joinEvent,
     checkUserJoinedStatus,
-    removeJoinedEvent
+    removeJoinedEvent,
 }
