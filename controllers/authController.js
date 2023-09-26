@@ -38,9 +38,7 @@ const handleLogin = async (req, res) => {
                 {
                     username: foundUser.username,
                     id: foundUser._id,
-                    roles: {
-                        User: foundUser.roles.User,
-                    },
+                    roles: foundUser.roles,
                 },
                 process.env.ACCESS_TOKEN_SECRET,
                 { expiresIn: '15min' }
@@ -64,6 +62,7 @@ const handleLogin = async (req, res) => {
                 message: `User ${foundUser.username} logged in successfully`,
                 id: foundUser._id,
                 username: foundUser.username,
+                roles: foundUser.roles,
                 auth_token,
             })
             return res
