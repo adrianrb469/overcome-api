@@ -29,6 +29,9 @@ const userSchema = new mongoose.Schema({
     savedEvents: [
         { type: mongoose.Schema.Types.ObjectId, ref: 'Event', unique: true },
     ],
+    joinedEvents: [
+        { type: mongoose.Schema.Types.ObjectId, ref: 'Event', unique: true },
+    ],
     profilePicture: { type: String, required: false },
     notifications: [
         {
