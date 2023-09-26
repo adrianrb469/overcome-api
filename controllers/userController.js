@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken')
 const User = require('../models/userModel')
 const bcrypt = require('bcrypt')
+var cloudinary = require('cloudinary').v2
 
 const getAllUsers = async (req, res) => {
     try {
@@ -18,6 +19,7 @@ const getUserById = async (req, res) => {
         const user = await User.findOne({ _id: req.params.id })
             .populate('savedEvents')
             .populate('createdEvents')
+            .populate('joinedEvents')
         res.status(200).json(user)
     } catch (error) {
         console.error(error)
@@ -51,6 +53,18 @@ const saveEvent = async (req, res) => {
     } catch (error) {
         console.error(error)
         res.status(500).send('Error saving event to user')
+    }
+}
+
+const joinEvent = async (req, res) => {
+    try {
+        const user = await User.findOne({ _id: req.body.user_id })
+        user.joinedEvents.push(req.body.event_id)
+        await user.save()
+        res.status(200).json(user)
+    } catch (error) {
+        console.error(error)
+        res.status(500).send('Error joinning event to user')
     }
 }
 
@@ -90,11 +104,34 @@ const editInfo = async (req, res) => {
         user.lastname = lastname ?? user.lastname
         user.email = email ?? user.email
         user.password = password ?? user.password
-        user.profilePicture = profilePicture ?? user.profilePicture
 
-        await user.save()
+        if (profilePicture) {
+            try {
+                const result = await cloudinary.uploader.upload(
+                    profilePicture,
+                    {
+                        folder: 'profile_pictures',
+                    }
+                )
 
-        res.status(200).json({ message: 'User updated successfully' })
+                console.log(result.secure_url)
+                user.profilePicture = result.secure_url
+            } catch (error) {
+                console.error(error)
+                return res
+                    .status(500)
+                    .json({ message: 'Internal server error' })
+            }
+        }
+        try {
+            await user.save()
+            return res
+                .status(200)
+                .json({ message: 'User updated successfully' })
+        } catch (error) {
+            console.error(error)
+            return res.status(500).json({ message: 'Internal server error' })
+        }
     } catch (error) {
         console.error(error)
         res.status(500).json({ message: 'Internal server error' })
@@ -209,6 +246,37 @@ const removeSavedEvent = async (req, res) => {
     }
 }
 
+const removeJoinedEvent = async (req, res) => {
+    try {
+        const { user_id, event_id } = req.body
+
+        const user = await User.findOne({ _id: user_id })
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' })
+        }
+
+        const eventIndex = user.joinedEvents.findIndex(
+            (eventId) => eventId.toString() === event_id
+        )
+
+        if (eventIndex !== -1) {
+            user.joinedEvents.splice(eventIndex, 1)
+            await user.save()
+
+            res.status(200).json({
+                message: 'Event removed from joined events',
+            })
+        } else {
+            res.status(404).json({
+                message: 'Event not found in joined events',
+            })
+        }
+    } catch (error) {
+        res.status(500).json({ message: err.message })
+    }
+}
+
 module.exports = {
     getAllUsers,
     getUserById,
@@ -221,4 +289,6 @@ module.exports = {
     getNotifications,
     updateNotifications,
     removeSavedEvent,
+    joinEvent,
+    removeJoinedEvent,
 }
