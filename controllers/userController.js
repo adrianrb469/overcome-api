@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken')
 const User = require('../models/userModel')
 const bcrypt = require('bcrypt')
+var cloudinary = require('cloudinary').v2
 
 const getAllUsers = async (req, res) => {
     try {
@@ -103,11 +104,40 @@ const editInfo = async (req, res) => {
         user.lastname = lastname ?? user.lastname
         user.email = email ?? user.email
         user.password = password ?? user.password
-        user.profilePicture = profilePicture ?? user.profilePicture
 
-        await user.save()
+        if (profilePicture) {
+            cloudinary.config({
+                cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+                api_key: process.env.CLOUDINARY_API_KEY,
+                api_secret: process.env.CLOUDINARY_API_SECRET,
+            })
 
-        res.status(200).json({ message: 'User updated successfully' })
+            try {
+                const result = await cloudinary.uploader.upload(
+                    profilePicture,
+                    {
+                        folder: 'profile_pictures',
+                    }
+                )
+
+                console.log(result.secure_url)
+                user.profilePicture = result.secure_url
+            } catch (error) {
+                console.error(error)
+                return res
+                    .status(500)
+                    .json({ message: 'Internal server error' })
+            }
+        }
+        try {
+            await user.save()
+            return res
+                .status(200)
+                .json({ message: 'User updated successfully' })
+        } catch (error) {
+            console.error(error)
+            return res.status(500).json({ message: 'Internal server error' })
+        }
     } catch (error) {
         console.error(error)
         res.status(500).json({ message: 'Internal server error' })
@@ -240,9 +270,13 @@ const removeJoinedEvent = async (req, res) => {
             user.joinedEvents.splice(eventIndex, 1)
             await user.save()
 
-            res.status(200).json({ message: 'Event removed from joined events' })
+            res.status(200).json({
+                message: 'Event removed from joined events',
+            })
         } else {
-            res.status(404).json({ message: 'Event not found in joined events' })
+            res.status(404).json({
+                message: 'Event not found in joined events',
+            })
         }
     } catch (error) {
         res.status(500).json({ message: err.message })
@@ -262,5 +296,5 @@ module.exports = {
     updateNotifications,
     removeSavedEvent,
     joinEvent,
-    removeJoinedEvent
+    removeJoinedEvent,
 }
