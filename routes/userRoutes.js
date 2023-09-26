@@ -9,7 +9,9 @@ router.get('/me', userController.getCurrentUser)
 router.get('/saved-events/:id', userController.getUserSavedEvents)
 router.get('/:id', userController.getUserById)
 router.post('/saveEvent', userController.saveEvent)
+router.post('/joinEvent', userController.joinEvent)
 router.post('/removeSavedEvent', userController.removeSavedEvent);
+router.post('/removeJoinedEvent', userController.removeJoinedEvent);
 router.post('/addFriend', userController.addFriend)
 // TODO:fix, this is not secure, anyone can edit anyone's info
 router.post('/editInfo/:id', userController.editInfo)
