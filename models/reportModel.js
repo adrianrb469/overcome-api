@@ -17,6 +17,11 @@ const reportSchema = new mongoose.Schema({
     reviseSubmit: {
         type: Date,
     },
+    type: {
+        type: String,
+        required: true,
+        enum: ['Event', 'User'],
+    },
     reportFor: {
         type: String,
         required: true,
