@@ -52,12 +52,10 @@ const reportSchema = new mongoose.Schema({
     eventId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Event',
-        required: true,
     },
     perpetrator: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
-        required: true,
     },
 })
 
