@@ -4,7 +4,7 @@ const User = require('../models/userModel')
 const Report = require('../models/reportModel')
 
 // Create report
-exports.createReport = async (req, res) => {
+const createReport = async (req, res) => {
     try {
         const report = await Report.create(req.body)
         res.status(201).json({
@@ -22,7 +22,7 @@ exports.createReport = async (req, res) => {
 }
 
 // Get all reports
-exports.getAllReports = async (req, res) => {
+const getAllReports = async (req, res) => {
     try {
         const reports = await Report.find({})
             .populate('reporter', 'username')
