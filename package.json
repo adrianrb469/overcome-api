@@ -4,7 +4,7 @@
     "description": "Backend of the Overcome web application using Express JS",
     "main": "index.js",
     "scripts": {
-        "test": "mocha test/events.test.js",
+        "test": "mocha test/events.test.js --exit",
         "dev": "nodemon src/index.js"
     },
     "author": "",
