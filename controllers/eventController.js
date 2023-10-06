@@ -48,9 +48,14 @@ const createEvent = async (req, res) => {
 
         // add event id to chat
         chat.event_id = event._id
+
+        const event_id = event._id
+
         await chat.save()
 
-        res.status(201).json(event)
+        res.status(201).json({
+            id: event_id,
+        })
     } catch (error) {
         console.error(error)
         res.status(500).send('Error creating event')

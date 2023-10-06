@@ -4,13 +4,14 @@
     "description": "Backend of the Overcome web application using Express JS",
     "main": "index.js",
     "scripts": {
-        "test": "mocha test/events.test.js",
+        "test": "mocha test/events.test.js --exit",
         "dev": "nodemon src/index.js"
     },
     "author": "",
     "license": "ISC",
     "dependencies": {
         "bcrypt": "^5.1.0",
+        "cloudinary": "^1.40.0",
         "cookie-parser": "^1.4.6",
         "cors": "^2.8.5",
         "dotenv": "^16.0.3",
@@ -18,7 +19,7 @@
         "jsonwebtoken": "^9.0.0",
         "mongoose": "^7.0.4",
         "nodemon": "^2.0.22",
-        "resend": "^1.0.0"
+        "resend": "^1.1.0"
     },
     "devDependencies": {
         "chai": "^4.3.7",

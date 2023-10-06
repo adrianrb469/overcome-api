@@ -9,6 +9,7 @@ const generateUniqueCode = () => {
 }
 
 const sendUniqueCode = async (req, res) => {
+    // console.log('sendUniqueCode')
     const resend = new Resend(process.env.RESEND_API_KEY)
 
     try {
@@ -49,7 +50,7 @@ const sendUniqueCode = async (req, res) => {
         await recover.save()
 
         const data = await resend.emails.send({
-            from: 'Overcome <onboarding@resend.dev>',
+            from: 'Overcome <sender@app-overcome.schr.tech>',
             to: [email],
             subject: '¡Código de recuperación de contraseña! 🙊',
             html: `
@@ -73,6 +74,7 @@ const sendUniqueCode = async (req, res) => {
         })
         res.status(200).json({ data })
     } catch (error) {
+        console.log(error)
         res.status(500).json({ error })
     }
 }
