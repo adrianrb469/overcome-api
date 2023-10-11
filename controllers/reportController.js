@@ -5,7 +5,7 @@ const { Resend } = require('resend')
 
 // Create report
 const createReport = async (req, res) => {
-    const resend = new Resend(process.env.RESEND_API_KEY)
+    const resend = await new Resend(process.env.RESEND_API_KEY)
 
     try {
         const report = await Report.create(req.body)

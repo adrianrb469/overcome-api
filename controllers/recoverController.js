@@ -10,7 +10,7 @@ const generateUniqueCode = () => {
 
 const sendUniqueCode = async (req, res) => {
     // console.log('sendUniqueCode')
-    const resend = new Resend(process.env.RESEND_API_KEY)
+    const resend = await new Resend(process.env.RESEND_API_KEY)
 
     try {
         const email = req.body.email
