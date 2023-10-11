@@ -11,4 +11,6 @@ router.post('/joinEvent/:id', eventController.joinEvent)
 router.post('/checkJoinedStatus/:id', eventController.checkUserJoinedStatus)
 router.post('/removeJoinedEvent/:id', eventController.removeJoinedEvent)
 
+router.delete('/:id', eventController.deleteEventById);
+
 module.exports = router

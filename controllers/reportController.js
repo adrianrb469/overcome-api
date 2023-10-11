@@ -88,7 +88,11 @@ const createReport = async (req, res) => {
 // Get all reports
 const getAllReports = async (req, res) => {
     try {
-        const reports = await Report.find({})
+        const filter = {};
+
+        if ( req.query.type ) filter.type = req.query.type;
+
+        const reports = await Report.find(filter)
             .populate('reporter', 'username')
             .populate('revisor', 'username')
             .populate('eventId', 'title')
