@@ -92,7 +92,15 @@ const editInfo = async (req, res) => {
      * - password
      * - profilePicture
      */
-    const { name, lastname, email, password, profilePicture, interestsArray, favoritesArray } = req.body
+    const {
+        name,
+        lastname,
+        email,
+        password,
+        profilePicture,
+        interestsArray,
+        favoritesArray,
+    } = req.body
     const userId = req.params.id
 
     try {
@@ -195,6 +203,9 @@ const getNotifications = async (req, res) => {
         const unreadCount = user.notifications.filter(
             (notification) => notification.show && !notification.read
         ).length
+
+        // Sort notifications by date, descending
+        notifications.sort((a, b) => b.date - a.date)
 
         res.status(200).json({ notifications, unreadCount })
     } catch (error) {
