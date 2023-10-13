@@ -1,6 +1,8 @@
 const Event = require('../models/eventModel')
 const Chat = require('../models/chatModel')
 const User = require('../models/userModel')
+const Report = require('../models/reportModel')
+const reportController = require('./reportController')
 
 const getAllEvents = async (req, res) => {
     try {
@@ -202,39 +204,47 @@ const removeJoinedEvent = async (req, res) => {
 
 const deleteEventById = async (req, res) => {
     try {
-      const eventId = req.params.id;
-  
-      // Busca el evento por su ID
-      const event = await Event.findById(eventId);
-  
-      if (!event) {
-        return res.status(404).json({ message: 'Event not found' });
-      }
+        const eventId = req.params.id
 
-      // Elimina el evento y las referencias en las relaciones
-      await event.remove();
-  
-      // Elimina las referencias del evento en la lista de eventos de los participantes
-      const participants = event.participants || [];
-      const promises = participants.map(async (participantId) => {
-        const user = await User.findById(participantId);
-        if (user) {
-          user.events.pull(eventId);
-          await user.save();
+        // Busca el evento por su ID
+        const event = await Event.findById(eventId)
+
+        if (!event) {
+            return res.status(404).json({ message: 'Event not found' })
         }
-      });
-  
-      // Elimina el chat asociado al evento si existe
-      if (event.chat) {
-        await Chat.findByIdAndRemove(event.chat);
-      }
-  
-      // Envía una respuesta exitosa
-      res.status(200).json({ message: 'Event deleted!' });
+
+        // Elimina las referencias del evento en la lista de eventos de los participantes
+        const participants = event.participants || []
+        const promises = participants.map(async (participantId) => {
+            const user = await User.findById(participantId)
+            if (user) {
+                user.savedEvents = user.savedEvents.filter(
+                    (savedEvent) => savedEvent != eventId
+                )
+                user.joinedEvents = user.joinedEvents.filter(
+                    (joinedEvent) => joinedEvent != eventId
+                )
+                await user.save()
+            }
+        })
+
+        // Elimina el chat asociado al evento si existe
+        if (event.chat) {
+            await Chat.findByIdAndRemove(event.chat)
+        }
+
+        // Delete any Report that have eventId
+        await reportController.deleteEventReports(eventId)
+
+        // Elimina el evento y las referencias en las relaciones
+        await Event.deleteOne({ _id: eventId })
+        // Envía una respuesta exitosa
+        res.status(200).json({ message: 'Event deleted!' })
     } catch (error) {
-      res.status(500).json({ message: error.message });
+        console.log(error)
+        res.status(500).json({ message: error.message })
     }
-  };
+}
 
 module.exports = {
     getAllEvents,

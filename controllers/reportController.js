@@ -88,9 +88,9 @@ const createReport = async (req, res) => {
 // Get all reports
 const getAllReports = async (req, res) => {
     try {
-        const filter = {};
+        const filter = {}
 
-        if ( req.query.type ) filter.type = req.query.type;
+        if (req.query.type) filter.type = req.query.type
 
         const reports = await Report.find(filter)
             .populate('reporter', 'username')
@@ -113,7 +113,119 @@ const getAllReports = async (req, res) => {
     }
 }
 
+// Delete report
+const deleteEventReports = async (eventId) => {
+    try {
+        const resend = await new Resend(process.env.RESEND_API_KEY)
+        // Get a list all the perpetrators (owner User) & All the reporters (User)
+        // Get from any report that contains eventId: eventId
+
+        const reportsWithEventId = await Report.find({ eventId: eventId })
+
+        const event = await Event.findById(eventId).populate('creator', 'email')
+
+        const emailOwner = event.creator.email
+
+        await resend.emails.send({
+            from: 'Overcome <sender@app-overcome.schr.tech>',
+            to: [emailOwner],
+            subject: 'Resolución de Reporte 📄',
+            html: `
+            <table width="100%"  cellpadding="0" cellspacing="0"  style="background-color: #ffffff; border-radius: 4px; padding: 20px;margin-top: 1rem">
+            <tr>
+              <td align="center">
+                <img src='https://drive.google.com/uc?id=1t2AKc12EanKhfjs_dIqXgXFk-ySY9l4x' style="height:100px"/>
+                <h1 style="color: #333333; font-size:29px">Hola, <a href="mailto:${emailOwner}">${emailOwner}</a>:</h1>
+                <p style="color: #666666;">Hace tiempo recibimos un reporte en <a href='https://app-overcome.onrender.com' target="_blank">Overcome</a>, sobre un evento que creaste. 
+                  <br/>
+                  Los reportes son valiosos para mantener una comunidad sana y respetuosa para todos. 
+                </p>
+                <br/>   
+                <p style="color: #666666;">
+                  Luego de revisar el reporte, hemos decidido eliminar el evento:
+                </p>
+                <table style="color: #666666; margin-bottom: 10px">
+                  <tr>
+                    <td style="padding:5px; font-weight: bold">Evento eliminado: </td>
+                    <td>${event.title}</td>
+                  </tr>
+                </table>
+                <p style="color: #666666;margin-bottom: 30px">
+                  Esperamos que sigas creando eventos en Overcome, pero recuerda que debes respetar las <a href='https://app-overcome.onrender.com/terms' target="_blank">Condiciones de Uso</a> de la plataforma.
+                </p>
+                <p style="color: ##666666; opacity: 0.7; width: 90%;">
+                  Si deseas mas información puedes contactarte con nuestro equipo a <a href="mailto:help@overcome.tech">help@overcome.tech</a>
+                </p>
+              </td>
+            </tr>
+          </table>
+        `,
+        })
+
+        var reporters = await Report.find({ eventId: eventId }).select(
+            'reporter'
+        )
+        // Get for each reporter get reporter.reporter, filter duplicates
+        reporters = reporters.filter(
+            (v, i, a) => a.findIndex((t) => t.reporter === v.reporter) === i
+        )
+
+        // For each reporter, send an email
+        await reporters.forEach(async (reporter) => {
+            var reporterEmail = await User.findById(reporter.reporter).select(
+                'email'
+            )
+            reporterEmail = reporterEmail.email
+
+            await resend.emails.send({
+                from: 'Overcome <sender@app-overcome.schr.tech>',
+                to: [reporterEmail],
+                subject: 'Resolución de Reporte 📄',
+                html: `
+                <table width="100%"  cellpadding="0" cellspacing="0"  style="background-color: #ffffff; border-radius: 4px; padding: 20px;margin-top: 1rem">
+                <tr>
+                  <td align="center">
+                    <img src='https://drive.google.com/uc?id=1t2AKc12EanKhfjs_dIqXgXFk-ySY9l4x' style="height:100px"/>
+                    <h1 style="color: #333333; font-size:29px">Hola, <a href="mailto:${reporterEmail}">${reporterEmail}</a>:</h1>
+                    <p style="color: #666666;">Hace tiempo recibimos un reporte tuyo en <a href='https://app-overcome.onrender.com' target="_blank">Overcome</a> hacia un evento que consideraste inapropiado. 
+                      <br/>
+                      Los reportes son valiosos para mantener una comunidad sana y respetuosa para todos. 
+                    </p>
+                    <br/>   
+                    <p style="color: #666666;">
+                      Luego de revisar el reporte, hemos decidido eliminar el evento:
+                    </p>
+                    <table style="color: #666666; margin-bottom: 10px">
+                      <tr>
+                        <td style="padding:5px; font-weight: bold">Evento eliminado: </td>
+                        <td>${event.title}</td>
+                      </tr>
+                    </table>
+                    <p style="color: #666666;margin-bottom: 30px">
+                      Gracias por ayudarnos a mantener una comunidad sana y respetuosa para todos.
+                    </p>
+                    <p style="color: ##666666; opacity: 0.7; width: 90%;">
+                      Si deseas mas información puedes contactarte con nuestro equipo a <a href="mailto:help@overcome.tech">help@overcome.tech</a>
+                    </p>
+                  </td>
+                </tr>
+              </table>
+            `,
+            })
+        })
+
+        await Report.deleteMany({ eventId: eventId })
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({
+            status: 'fail',
+            message: error.message,
+        })
+    }
+}
+
 module.exports = {
     createReport,
     getAllReports,
+    deleteEventReports,
 }
