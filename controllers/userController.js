@@ -20,6 +20,8 @@ const getUserById = async (req, res) => {
             .populate('savedEvents')
             .populate('createdEvents')
             .populate('joinedEvents')
+            .populate('interests')
+            .populate('favorites')
         res.status(200).json(user)
     } catch (error) {
         console.error(error)
@@ -90,7 +92,7 @@ const editInfo = async (req, res) => {
      * - password
      * - profilePicture
      */
-    const { name, lastname, email, password, profilePicture } = req.body
+    const { name, lastname, email, password, profilePicture, interestsArray, favoritesArray } = req.body
     const userId = req.params.id
 
     try {
@@ -104,6 +106,8 @@ const editInfo = async (req, res) => {
         user.lastname = lastname ?? user.lastname
         user.email = email ?? user.email
         user.password = password ?? user.password
+        user.interests = interestsArray ?? user.interests
+        user.favorites = favoritesArray ?? user.favorites
 
         if (profilePicture) {
             try {
