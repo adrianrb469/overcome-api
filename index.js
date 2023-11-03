@@ -6,7 +6,6 @@ const authRoutes = require('./routes/authRoutes')
 const register = require('./routes/register')
 const refresh = require('./routes/refresh')
 const eventRoutes = require('./routes/eventRoutes')
-const chatRoutes = require('./routes/chatRoutes')
 const userRelationRoutes = require('./routes/userRelationRoutes')
 const recoverRoutes = require('./routes/recoverRoutes')
 const reportRoutes = require('./routes/reportRoutes')
@@ -22,6 +21,7 @@ cloudinary.config({
     api_key: process.env.CLOUDINARY_API_KEY,
     api_secret: process.env.CLOUDINARY_API_SECRET,
 })
+const http = require('http')
 
 app.use(
     cors({
@@ -48,7 +48,6 @@ app.use('/users', userRoutes)
 app.use('/register', register)
 app.use('/refresh', refresh)
 app.use('/events', eventRoutes)
-app.use('/chats', chatRoutes)
 app.use('/relations', userRelationRoutes)
 app.use('/recover', recoverRoutes)
 app.use('/reports', reportRoutes)
@@ -69,10 +68,21 @@ mongoose
     })
     .catch((err) => console.error(err))
 
-console.log('Connecting to database...')
+const server = http.createServer(app)
+const io = require('socket.io')(server, {
+    cors: {
+        origin: `${process.env.CLIENT_URL}`,
+        credentials: true,
+    },
+})
+
 mongoose.connection.once('open', () => {
-    const server = app.listen(process.env.PORT, () => {
+    server.listen(process.env.PORT, () => {
         console.log('Server is running on port', server.address().port)
     })
 })
+
+const chatRoutes = require('./routes/chatRoutes')(io)
+app.use('/chats', chatRoutes)
+
 module.exports = app
