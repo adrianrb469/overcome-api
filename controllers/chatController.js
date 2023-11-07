@@ -179,9 +179,9 @@ module.exports = function (io) {
             addMessage(message.chat_id, message.user_id, message.message)
         })
 
-        socket.on('disconnect', () => {
-            console.log('user disconnected from chat')
-        })
+        // socket.on('disconnect', () => {
+        //     console.log('user disconnected from chat')
+        // })
     })
 
     return {
