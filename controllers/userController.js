@@ -218,13 +218,22 @@ const updateNotifications = async (req, res) => {
     try {
         const { id } = req.params
         const { notifications } = req.body
+
         const user = await User.findById(id)
 
         if (!user) {
             return res.status(404).json({ message: 'User not found' })
         }
 
-        user.notifications = notifications
+        notifications.forEach((notification) => {
+            const index = user.notifications.findIndex(
+                (n) => n._id.toString() === notification._id
+            )
+            if (index !== -1) {
+                user.notifications[index] = notification
+            }
+        })
+
         await user.save()
 
         res.status(200).json({ message: 'Notifications updated successfully' })
