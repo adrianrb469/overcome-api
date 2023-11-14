@@ -35,6 +35,10 @@ const userSchema = new mongoose.Schema({
     profilePicture: { type: String, required: false },
     notifications: [
         {
+            _id: {
+                type: mongoose.Schema.Types.ObjectId,
+                auto: true,
+            },
             message: {
                 type: String,
                 required: true,
