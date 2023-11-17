@@ -187,6 +187,28 @@ const getUserSavedEvents = async (req, res) => {
     }
 }
 
+
+const getUserUpcomingEvents = async (req, res) => {
+    try {
+        const { id } = req.params
+
+        // const events = await User.findById(id).populate()
+        const events = await User.findById(id).populate('savedEvents')
+        // let upcomingEvents = []
+        
+        // if (events && Array.isArray(events)) {
+        //     upcomingEvents = events.sort((a, b) => a.date - b.date);
+        //     upcomingEvents = upcomingEvents.slice(0, 3)
+        // }
+        // let upcomingEvents = events.sort((a, b) => new Date(a.date) - new Date(b.date))
+        // upcomingEvents = upcomingEvents.slice(0, 3)
+
+        res.status(200).json(events)
+    } catch (error) {
+        res.status(500).send('Error fetching events from database')
+    }
+}
+
 const getNotifications = async (req, res) => {
     try {
         const { id } = req.params
@@ -315,4 +337,5 @@ module.exports = {
     removeSavedEvent,
     joinEvent,
     removeJoinedEvent,
+    getUserUpcomingEvents
 }
